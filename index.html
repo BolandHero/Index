@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Macro Calculator</title>
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--tx:#1d2a24;--mut:#66736c;--ac:#1f8a5b;--ac2:#e8f4ee;--bd:#dde3df;--p:#d9534f;--c:#e0a100;--f:#3b82c4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a16;--card:#1b2620;--tx:#e8efe9;--mut:#93a39a;--ac:#3fbf86;--ac2:#1f3329;--bd:#2c3a33;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121a16;--card:#1b2620;--tx:#e8efe9;--mut:#93a39a;--ac:#3fbf86;--ac2:#1f3329;--bd:#2c3a33;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+main{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.7rem;margin:.2em 0}
+.sub{color:var(--mut);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+label{display:block;font-size:.85rem;color:var(--mut);margin-bottom:4px}
+input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-size:1rem}
+.goals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.goals button{padding:12px 6px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:10px;font-size:.95rem;cursor:pointer}
+.goals button small{display:block;color:var(--mut);font-size:.75rem}
+.goals button.on{background:var(--ac2);border-color:var(--ac);font-weight:600}
+.go{margin-top:14px;width:100%;padding:13px;border:0;border-radius:10px;background:var(--ac);color:#fff;font-size:1.05rem;font-weight:600;cursor:pointer}
+.err{color:var(--p);margin:10px 0 0;min-height:1.2em}
+.kcal{font-size:2.4rem;font-weight:700}
+.kcal span{font-size:1rem;color:var(--mut);font-weight:400}
+.macros{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;text-align:center}
+.macros div{border-radius:10px;padding:10px 4px;background:var(--ac2)}
+.macros b{display:block;font-size:1.4rem}
+.macros small{color:var(--mut)}
+.note{color:var(--mut);font-size:.85rem;margin:10px 0 0}
+h2{font-size:1.2rem;margin:22px 0 8px}
+.meal-h{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px}
+.meal-h span{color:var(--mut);font-size:.9rem}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.opt{border:1px solid var(--bd);border-radius:12px;padding:14px;background:var(--card)}
+.opt h3{margin:0 0 6px;font-size:1rem}
+.opt ul{margin:0 0 8px;padding-left:18px}
+.opt .m{font-size:.82rem;color:var(--mut);border-top:1px solid var(--bd);padding-top:6px}
+.chg{margin:10px 0 0;padding:9px 14px;border:1px solid var(--ac);background:transparent;color:var(--ac);border-radius:10px;cursor:pointer;font-size:.9rem}
+.hide{display:none}
+</style>
+</head>
+<body>
+<main>
+<h1>Macro Calculator</h1>
+<p class="sub">Inserisci i tuoi dati, scegli l’obiettivo e ottieni kcal, macro e idee per 4 pasti al giorno.</p>
+
+<div class="card">
+<div class="grid">
+<div><label for="sex">Sesso</label><select id="sex"><option value="m">Uomo</option><option value="f">Donna</option></select></div>
+<div><label for="age">Età</label><input id="age" type="number" min="14" max="90" value="30"></div>
+<div><label for="h">Altezza (cm)</label><input id="h" type="number" min="120" max="230" placeholder="175"></div>
+<div><label for="w">Peso (kg)</label><input id="w" type="number" min="35" max="250" step="0.1" placeholder="70"></div>
+</div>
+<div style="margin-top:12px"><label for="steps">Passi giornalieri medi (NEAT)</label><input id="steps" type="number" min="0" max="40000" step="500" value="8000"></div>
+<div style="margin-top:12px"><label for="rest">Giorni di riposo a settimana</label><input id="rest" type="number" min="0" max="7" value="2"></div>
+<h2 style="font-size:1rem;margin:16px 0 8px">Sedute di allenamento a settimana</h2>
+<div class="grid">
+<div><label for="n1">Cardio: n. sedute</label><input id="n1" type="number" min="0" max="14" value="0"><label for="d1" style="margin-top:6px">Durata media (min)</label><input id="d1" type="number" min="10" max="240" value="45"></div>
+<div><label for="n2">Pesi: n. sedute</label><input id="n2" type="number" min="0" max="14" value="3"><label for="d2" style="margin-top:6px">Durata media (min)</label><input id="d2" type="number" min="10" max="240" value="60"></div>
+<div><label for="n3">Metcon: n. sedute</label><input id="n3" type="number" min="0" max="14" value="0"><label for="d3" style="margin-top:6px">Durata media (min)</label><input id="d3" type="number" min="10" max="240" value="30"></div>
+</div>
+<div class="goals" id="goals">
+<button data-g="cut" type="button">Cut<small>−20% kcal</small></button>
+<button data-g="maint" type="button" class="on">Mantenimento<small>kcal di mantenimento</small></button>
+<button data-g="bulk" type="button">Bulk<small>+10% kcal</small></button>
+</div>
+<button class="go" id="go" type="button">Calcola</button>
+<p class="err" id="err"></p>
+</div>
+
+<div id="out" class="hide">
+<div class="card">
+<div class="goals" id="days" style="margin:0 0 12px;grid-template-columns:repeat(2,1fr)"><button data-d="t" type="button" class="on">Giorno di allenamento</button><button data-d="r" type="button">Giorno di riposo</button></div>
+<div class="kcal"><span id="goalLbl"></span><br><span id="kcal"></span> <span>kcal al giorno</span></div>
+<div class="macros">
+<div><b id="mp"></b><small>Proteine</small></div>
+<div><b id="mc"></b><small>Carboidrati</small></div>
+<div><b id="mf"></b><small>Grassi</small></div>
+</div>
+<p class="note" id="bmrNote"></p>
+</div>
+<div id="meals"></div>
+<p class="note">Strumento indicativo: metabolismo basale con Mifflin-St Jeor, passi stimati a circa 0,4 kcal per kg ogni 1000 passi e allenamento stimato con valori MET medi (cardio 7, pesi 5, metcon 9); non sostituisce il parere di un medico o di un nutrizionista. Le grammature sono a crudo (dove applicabile) e vengono scalate per raggiungere le kcal del pasto. Ogni alimento è limitato a 200 g (400 g per le fonti di carboidrati come pasta, riso, patate, avena e pane): con kcal molto alte, le kcal di un’opzione possono risultare inferiori al target del pasto.</p>
+</div>
+</main>
+
+<script>
+// kcal, proteine, carboidrati, grassi per 100 g (valori medi indicativi)
+var F={
+avena:[372,13,60,7,"Fiocchi d’avena"],latte:[46,3.4,4.9,1.5,"Latte parz. scremato","ml"],banana:[89,1,23,.3,"Banana"],
+mandorle:[579,21,22,50,"Mandorle"],yogurt:[57,10,4,.2,"Yogurt greco 0%"],frutta:[50,.7,12,.2,"Frutta fresca"],
+miele:[304,.3,82,0,"Miele"],uova:[143,12.6,.7,9.5,"Uova"],pane:[265,9,49,3.2,"Pane integrale"],
+marm:[250,.5,60,0,"Marmellata"],pasta:[355,12,74,1.5,"Pasta"],riso:[350,7,78,.6,"Riso"],
+pollo:[110,23,0,1.5,"Petto di pollo"],tonno:[110,25,0,1,"Tonno al naturale"],olio:[884,0,0,100,"Olio extravergine"],
+verdure:[25,2,4,.3,"Verdure miste"],salmone:[208,20,0,13,"Salmone"],patate:[77,2,17,.1,"Patate"],
+merluzzo:[82,18,0,.7,"Merluzzo"],lenticchie:[100,8,16,.5,"Lenticchie lesse"],gallette:[387,8,82,3,"Gallette di riso"],
+arachidi:[588,25,20,50,"Burro di arachidi"],fiocchi:[98,11,3.4,4.3,"Fiocchi di latte"],bresaola:[151,32,0,2,"Bresaola"],
+ricotta:[146,9,3.5,10,"Ricotta"],cereali:[380,8,80,2,"Cereali integrali"],whey:[380,80,6,6,"Proteine whey"],
+couscous:[360,13,72,1.8,"Cous cous"],tacchino:[104,24,0,1,"Petto di tacchino"],ceci:[120,7,18,2.5,"Ceci lessi"],
+manzo:[120,22,0,3,"Manzo magro"],gamberi:[85,18,0,1,"Gamberi"],parmigiano:[392,33,0,28,"Parmigiano"],
+prosciutto:[145,21,0,6,"Prosciutto cotto"],avocado:[160,2,9,15,"Avocado"],fagioli:[110,7,19,.5,"Fagioli lessi"],orzo:[350,10,73,1.5,"Orzo perlato"],
+spigola:[97,18,0,2.5,"Spigola"],tofu:[120,13,2,7,"Tofu"],gnocchi:[150,3,33,.5,"Gnocchi di patate"]
+};
+var O={
+colazione:[
+{n:"Porridge alla banana",i:[["avena",50],["latte",200],["banana",100],["mandorle",10]]},
+{n:"Yogurt greco, avena e frutta",i:[["yogurt",200],["avena",40],["frutta",100],["miele",10]]},
+{n:"Uova e pane con marmellata",i:[["uova",120],["pane",70],["marm",20],["frutta",100]]},
+{n:"Pane, ricotta e miele",i:[["pane",70],["ricotta",100],["miele",10],["frutta",150]]},
+{n:"Cereali con latte e frutta",i:[["cereali",50],["latte",200],["frutta",100],["mandorle",10]]},
+{n:"Pancake proteici",i:[["avena",50],["uova",100],["whey",20],["banana",100]]},
+{n:"Pane, uova strapazzate e avocado",i:[["pane",70],["uova",120],["avocado",40],["frutta",100]]},
+{n:"Yogurt, cereali e banana",i:[["yogurt",200],["cereali",40],["banana",100],["mandorle",10]]},
+{n:"Pane, prosciutto e latte",i:[["pane",80],["prosciutto",40],["latte",200],["frutta",100]]},
+{n:"Porridge proteico",i:[["avena",50],["latte",200],["whey",20],["frutta",100]]},
+{n:"Pane, burro di arachidi e banana",i:[["pane",70],["arachidi",20],["banana",100],["yogurt",100]]},
+{n:"Fiocchi di latte, cereali e miele",i:[["fiocchi",150],["cereali",40],["frutta",100],["miele",8]]}],
+pranzo:[
+{n:"Pasta, pollo e verdure",i:[["pasta",90],["pollo",120],["verdure",150],["olio",10]]},
+{n:"Riso, tonno e verdure",i:[["riso",90],["tonno",100],["verdure",150],["olio",10]]},
+{n:"Patate, salmone e verdure",i:[["patate",200],["salmone",120],["verdure",150],["olio",5]]},
+{n:"Cous cous, tacchino e verdure",i:[["couscous",90],["tacchino",130],["verdure",150],["olio",10]]},
+{n:"Pasta, ceci e verdure",i:[["pasta",80],["ceci",150],["verdure",150],["olio",10]]},
+{n:"Riso, manzo e verdure",i:[["riso",90],["manzo",120],["verdure",150],["olio",8]]},
+{n:"Orzo, tonno e verdure",i:[["orzo",90],["tonno",100],["verdure",150],["olio",10]]},
+{n:"Gnocchi, pollo e verdure",i:[["gnocchi",200],["pollo",120],["verdure",150],["olio",8],["parmigiano",10]]},
+{n:"Riso, fagioli e uova",i:[["riso",80],["fagioli",150],["uova",60],["verdure",150],["olio",8]]},
+{n:"Pasta, gamberi e verdure",i:[["pasta",90],["gamberi",150],["verdure",150],["olio",10]]},
+{n:"Panino con tacchino e avocado",i:[["pane",120],["tacchino",120],["verdure",100],["avocado",40]]},
+{n:"Patate, manzo e verdure",i:[["patate",200],["manzo",130],["verdure",150],["olio",8]]}],
+merenda:[
+{n:"Yogurt, frutta e mandorle",i:[["yogurt",170],["frutta",100],["mandorle",15]]},
+{n:"Gallette, burro di arachidi e banana",i:[["gallette",30],["arachidi",15],["banana",100]]},
+{n:"Fiocchi di latte e pane",i:[["fiocchi",150],["pane",40],["frutta",100]]},
+{n:"Pane, bresaola e frutta",i:[["pane",50],["bresaola",50],["frutta",150]]},
+{n:"Yogurt, cereali e miele",i:[["yogurt",170],["cereali",30],["miele",8]]},
+{n:"Frullato proteico",i:[["latte",200],["whey",25],["banana",100]]},
+{n:"Ricotta, miele e frutta",i:[["ricotta",120],["miele",10],["frutta",150]]},
+{n:"Pane e prosciutto con frutta",i:[["pane",50],["prosciutto",50],["frutta",100]]},
+{n:"Yogurt e whey con banana",i:[["yogurt",150],["whey",15],["banana",100]]},
+{n:"Mandorle, frutta e yogurt",i:[["mandorle",25],["frutta",200],["yogurt",100]]},
+{n:"Gallette, ricotta e frutta",i:[["gallette",30],["ricotta",80],["frutta",150],["miele",5]]},
+{n:"Cereali, latte e frutta",i:[["cereali",40],["latte",200],["frutta",100]]}],
+cena:[
+{n:"Merluzzo, patate e verdure",i:[["merluzzo",200],["patate",200],["verdure",200],["olio",10]]},
+{n:"Pollo, riso e verdure",i:[["pollo",150],["riso",70],["verdure",200],["olio",10]]},
+{n:"Lenticchie, uova e verdure",i:[["lenticchie",200],["uova",100],["pane",60],["verdure",150],["olio",8]]},
+{n:"Gamberi, riso e verdure",i:[["gamberi",200],["riso",70],["verdure",200],["olio",10]]},
+{n:"Tacchino, patate e verdure",i:[["tacchino",150],["patate",200],["verdure",200],["olio",10]]},
+{n:"Frittata di verdure con pane",i:[["uova",150],["verdure",200],["pane",80],["parmigiano",15],["olio",5]]},
+{n:"Spigola, patate e verdure",i:[["spigola",200],["patate",200],["verdure",200],["olio",10]]},
+{n:"Manzo, riso e verdure",i:[["manzo",150],["riso",70],["verdure",200],["olio",8]]},
+{n:"Tonno, fagioli e pane",i:[["tonno",100],["fagioli",150],["pane",60],["verdure",200],["olio",8]]},
+{n:"Salmone, cous cous e verdure",i:[["salmone",120],["couscous",70],["verdure",200],["olio",5]]},
+{n:"Pollo, patate e avocado",i:[["pollo",150],["patate",200],["avocado",40],["verdure",200]]},
+{n:"Tofu, riso e verdure",i:[["tofu",150],["riso",70],["verdure",200],["olio",8]]}]
+};
+var SPLIT=[["colazione","Colazione",.25],["pranzo","Pranzo",.35],["merenda","Merenda",.10],["cena","Cena",.30]];
+var GOAL={cut:{l:"Cut",k:.8,p:2.0,f:.8},maint:{l:"Mantenimento",k:1,p:1.8,f:.9},bulk:{l:"Bulk",k:1.1,p:1.8,f:.9}};
+var goal="maint",day="t",KC=0,OFF={},CARB={orzo:1,gnocchi:1,pasta:1,riso:1,patate:1,avena:1,pane:1,cereali:1,couscous:1,gallette:1},cp=function(n){return CARB[n]?400:200};
+var $=function(id){return document.getElementById(id)};
+
+document.querySelectorAll("#goals button").forEach(function(b){
+b.onclick=function(){document.querySelectorAll("#goals button").forEach(function(x){x.classList.remove("on")});b.classList.add("on");goal=b.dataset.g;if(!$("out").classList.contains("hide"))calc()}});
+$("go").onclick=calc;
+document.querySelectorAll("#days button").forEach(function(b){b.onclick=function(){document.querySelectorAll("#days button").forEach(function(x){x.classList.remove("on")});b.classList.add("on");day=b.dataset.d;if(!$("out").classList.contains("hide"))calc()}});
+
+function r5(x){return Math.max(5,Math.round(x/5)*5)}
+function calc(){
+var h=+$("h").value,w=+$("w").value,a=+$("age").value,s=$("sex").value;
+if(!(h>=120&&h<=230)||!(w>=35&&w<=250)||!(a>=14&&a<=90)){$("err").textContent="Controlla altezza, peso ed età: servono valori validi.";return}
+$("err").textContent="";
+var bmr=10*w+6.25*h-5*a+(s==="m"?5:-161);
+var st=Math.max(0,+$("steps").value||0),ex=0,MET=[7,5,9];
+for(var q=1;q<=3;q++){var nn=Math.max(0,+$("n"+q).value||0),dd=Math.max(0,+$("d"+q).value||0);ex+=nn*(MET[q-1]-1)*w*dd/60}
+var rd=Math.min(7,Math.max(0,Math.round(+$("rest").value||0))),td=7-rd,neat=st*0.0004*w;
+ex=td>0?ex/td:0;
+var exDay=day==="t"?ex:0,tdee=bmr*1.15+neat+exDay,G=GOAL[goal];
+var kcal=Math.round(tdee*G.k/10)*10;
+var p=Math.round(G.p*w),f=Math.round(G.f*w);
+var c=Math.max(0,Math.round((kcal-p*4-f*9)/4));
+$("goalLbl").textContent=G.l+" · "+(day==="t"?"giorno di allenamento":"giorno di riposo");
+$("kcal").textContent=kcal;
+$("mp").textContent=p+" g";$("mc").textContent=c+" g";$("mf").textContent=f+" g";
+$("bmrNote").textContent="Metabolismo basale e digestione: "+Math.round(bmr*1.15)+" kcal · Passi (NEAT): "+Math.round(neat)+" kcal · Allenamento: "+Math.round(exDay)+" kcal · Mantenimento: "+Math.round(tdee)+" kcal · Media settimanale con obiettivo: "+Math.round((bmr*1.15+neat+ex*td/7)*G.k/10)*10+" kcal";
+KC=kcal;render();$("out").classList.remove("hide");if(!calc.first){calc.first=1;$("out").scrollIntoView({behavior:"smooth"})}
+}
+function render(){var kcal=KC,html="";
+SPLIT.forEach(function(m){
+var t=Math.round(kcal*m[2]);
+html+='<h2 class="meal-h">'+m[1]+' <span>≈ '+t+' kcal · '+Math.round(m[2]*100)+'% della giornata</span></h2><div class="opts">';
+var pool=O[m[0]],off=(OFF[m[0]]||0)%pool.length,shown=[0,1,2].map(function(j){return pool[(off+j)%pool.length]});
+shown.forEach(function(o,idx){
+var W={},cap={},rem=t,tk=0,tp=0,tc=0,tf=0,li="";
+for(var it=0;it<6;it++){var b=0;o.i.forEach(function(x){if(!cap[x[0]])b+=F[x[0]][0]*x[1]/100});var k=b>0?rem/b:0,hit=0;
+o.i.forEach(function(x){if(!cap[x[0]]&&x[1]*k>cp(x[0])){cap[x[0]]=1;hit=1;rem-=F[x[0]][0]*cp(x[0])/100}});
+if(!hit){o.i.forEach(function(x){W[x[0]]=cap[x[0]]?cp(x[0]):Math.min(cp(x[0]),r5(x[1]*k))});break}}
+o.i.forEach(function(x){if(W[x[0]]==null)W[x[0]]=cp(x[0])});
+o.i.forEach(function(x){
+var d=F[x[0]],g=W[x[0]];
+tk+=d[0]*g/100;tp+=d[1]*g/100;tc+=d[2]*g/100;tf+=d[3]*g/100;
+li+="<li>"+d[4]+": <b>"+g+" "+(d[5]||"g")+"</b></li>"});
+html+='<div class="opt"><h3>Opzione '+(idx+1)+" · "+o.n+"</h3><ul>"+li+'</ul><div class="m">'+Math.round(tk)+" kcal · P "+Math.round(tp)+" g · C "+Math.round(tc)+" g · G "+Math.round(tf)+" g</div></div>"});
+html+='</div><button class="chg" data-m="'+m[0]+'" type="button">🔄 Cambia opzioni</button>'});
+$("meals").innerHTML=html;
+}
+$("meals").onclick=function(e){var b=e.target.closest(".chg");if(b){OFF[b.dataset.m]=(OFF[b.dataset.m]||0)+3;render()}};
+</script>
+</body>
+</html>
